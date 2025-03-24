@@ -286,6 +286,10 @@ class MusicPlayer(QMainWindow):
         self.trayLoopAction = QAction("Loop", self)
         self.trayLoopAction.triggered.connect(self.toggle_loop)
         self.trayMenu.addAction(self.trayLoopAction)
+        self.trayMenu.addSeparator()
+        self.trayExitAction = QAction("Exit", self)
+        self.trayExitAction.triggered.connect(self.close)
+        self.trayMenu.addAction(self.trayExitAction)
         self.trayIcon.setContextMenu(self.trayMenu)
         self.trayIcon.activated.connect(self.on_tray_icon_activated)
         self.trayIcon.show()
@@ -306,8 +310,11 @@ class MusicPlayer(QMainWindow):
 
     def closeEvent(self, event):
         if self.minimizeOnCloseAction.isChecked():
-            event.ignore()
-            self.minimize_to_tray()
+            if self.trayIcon is None:
+                event.ignore()
+                self.minimize_to_tray()
+            else:
+                event.accept()
         else:
             event.accept()
 
