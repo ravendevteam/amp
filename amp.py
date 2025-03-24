@@ -240,6 +240,7 @@ class MusicPlayer(QMainWindow):
         self.settings = QSettings("Raven", "Amp")
         self.setup_view_menu()
         self.trayIcon = None
+        self.update_slider = True
 
     def init_ui(self):
         main_widget = QWidget(self)
@@ -563,7 +564,11 @@ class MusicPlayer(QMainWindow):
         self.fileTreeView.doubleClicked.connect(self.onFileTreeDoubleClicked)
         if self.mediaPlayer:
             self.volumeSlider.valueChanged.connect(self.mediaPlayer.set_volume)
-        self.positionSlider.sliderMoved.connect(self.seek)
+        self.positionSlider.sliderPressed.connect(lambda: self.allow_position_updates(allow=False))
+        self.positionSlider.sliderReleased.connect(lambda: (self.seek(self.positionSlider.value()), self.allow_position_updates(allow=True)))
+
+    def allow_position_updates(self, allow: bool = True):
+        self.update_slider = allow
 
     def open_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Open Folder with Audio Files")
@@ -682,9 +687,10 @@ class MusicPlayer(QMainWindow):
         self.loopButton.setText(loop_text)
 
     def on_position_changed(self, position):
-        self.positionSlider.setValue(position)
-        if self.mediaPlayer:
-            self.update_time_labels(position, self.mediaPlayer.get_duration())
+        if self.update_slider:
+            self.positionSlider.setValue(position)
+            if self.mediaPlayer:
+                self.update_time_labels(position, self.mediaPlayer.get_duration())
 
     def on_duration_changed(self, duration):
         self.positionSlider.setRange(0, duration)
@@ -694,7 +700,8 @@ class MusicPlayer(QMainWindow):
     def update_position(self):
         if self.mediaPlayer:
             pos = self.mediaPlayer.get_position()
-            self.positionSlider.setValue(pos)
+            if self.update_slider:
+                self.positionSlider.setValue(pos)
             self.update_time_labels(pos, self.mediaPlayer.get_duration())
         self.update_status_bar()
 
