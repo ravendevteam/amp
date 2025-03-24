@@ -1,0 +1,112 @@
+/*
+    Amp Professional
+*/
+
+/* Text area */
+QTextEdit, QDialog QTextEdit {
+    font-family: 'Cascadia Code', 'Courier New', Courier, monospace;
+    font-weight: 400;
+    font-size: 14px;
+    background-color: #f5f5f5;
+    color: #000000;
+    border: 1px solid #cccccc;
+    padding: 2px;
+}
+
+/* Main window */
+QMainWindow, QDialog {
+    background-color: #ffffff;
+}
+
+/* Bottom status bar */
+QStatusBar {
+    background-color: #f1f1f1;
+    color: #202020;
+}
+
+/* Top menu bar */
+QMenuBar {
+    background-color: #0c0c0c;
+    color: #ffffff;
+}
+
+/* Menu bar options */
+QMenuBar::item {
+    background: transparent;
+    padding: 5px 10px;
+}
+
+/* Menu bar options when selected */
+QMenuBar::item:selected {
+    background: #000000;
+}
+
+/* Buttons */
+QPushButton, QDialog QPushButton {
+    background: transparent;
+    border: 1px solid #cccccc;
+    color: #000000;
+    padding: 5px 10px;
+}
+
+/* Button on hover */
+QPushButton:hover, QDialog QPushButton:hover {
+    background-color: #f5f5f5;
+}
+
+/* Line Edit */
+QLineEdit, QDialog QLineEdit {
+    border: 1px solid #cccccc;
+    padding: 3px;
+    background-color: #ffffff;
+}
+
+/* Focused line edit */
+QLineEdit:focus, QDialog QLineEdit:focus {
+    border-color: #66aaff;
+}
+
+/* Scrollbar */
+QScrollBar:horizontal, QDialog QScrollBar:horizontal {
+    height: 10px;
+}
+
+QScrollBar:vertical, QDialog QScrollBar:vertical {
+    width: 10px;
+}
+
+QScrollBar::handle:horizontal, QScrollBar::handle:vertical, QDialog QScrollBar::handle:horizontal, QDialog QScrollBar::handle:vertical {
+    background: #cccccc;
+    border-radius: 5px;
+}
+
+/* Progress Bar Slider */
+QSlider#progressBar {
+    background: transparent;
+    height: 12px;
+    margin: 0 5px;
+}
+
+QSlider#progressBar::sub-page:horizontal {
+    background: #000000;
+    border: 1px solid #555555;
+    height: 12px;
+}
+
+QSlider#progressBar::add-page:horizontal {
+    background: #f5f5f5;
+    border: 1px solid #cccccc;
+    height: 12px;
+}
+
+QSlider#progressBar::handle:horizontal {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #444444,
+        stop: 1 #0c0c0c
+    );
+    border: 1px solid #999999;
+    width: 12px;
+    height: 14px;
+    margin: -3px 0;
+}

@@ -1,0 +1,3 @@
+PyQt5>=5.15.2
+python-vlc>=3.0.11118
+mutagen>=1.45.1
