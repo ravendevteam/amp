@@ -378,23 +378,34 @@ class MusicPlayer(QMainWindow):
                     'track': None
                 }
             title, artist, album, year, artwork_data, track = None, None, None, None, None, None
-            for tag in audio.tags.keys():
-                if tag.startswith('TIT2'):
-                    title = str(audio.tags[tag])
-                elif tag.startswith('TPE1'):
-                    artist = str(audio.tags[tag])
-                elif tag.startswith('TALB'):
-                    album = str(audio.tags[tag])
-                elif tag.startswith('TDRC') or tag.startswith('TYER'):
-                    year = str(audio.tags[tag])
-                elif tag.startswith('APIC'):
-                    artwork_data = audio.tags[tag].data
-                elif tag.startswith('TRCK'):
-                    try:
-                        track_str = str(audio.tags[tag])
-                        track = track_str.split('/')[0].strip()
-                    except Exception:
-                        track = None
+            if file_path.lower().endswith('.m4a'):
+                title = audio.tags.get("©nam", [None])[0]
+                artist = audio.tags.get("©ART", [None])[0]
+                album = audio.tags.get("©alb", [None])[0]
+                year = audio.tags.get("©day", [None])[0]
+                track_info = audio.tags.get("trkn", [(None, None)])[0]
+                track = track_info[0] if track_info else None
+                if "covr" in audio.tags:
+                    for cover in audio.tags["covr"]:
+                        artwork_data = cover
+            else:
+                for tag in audio.tags.keys():
+                    if tag.startswith('TIT2'):
+                        title = str(audio.tags[tag])
+                    elif tag.startswith('TPE1'):
+                        artist = str(audio.tags[tag])
+                    elif tag.startswith('TALB'):
+                        album = str(audio.tags[tag])
+                    elif tag.startswith('TDRC') or tag.startswith('TYER'):
+                        year = str(audio.tags[tag])
+                    elif tag.startswith('APIC'):
+                        artwork_data = audio.tags[tag].data
+                    elif tag.startswith('TRCK'):
+                        try:
+                            track_str = str(audio.tags[tag])
+                            track = track_str.split('/')[0].strip()
+                        except Exception:
+                            track = None
             return {
                 'title': title,
                 'artist': artist,
@@ -590,7 +601,7 @@ class MusicPlayer(QMainWindow):
             self.statusBar().showMessage(f"Opened folder: {folder}", 3000)
             self.folderAudioFiles.clear()
             self.trackMetadata.clear()
-            audio_extensions = ('.mp3', '.wav', '.ogg', '.flac')
+            audio_extensions = ('.mp3', '.wav', '.ogg', '.flac', '.m4a')
             all_files = os.listdir(folder)
             audio_files = [f for f in all_files if f.lower().endswith(audio_extensions)]
             files_with_path = [os.path.join(folder, f) for f in audio_files]
@@ -625,7 +636,7 @@ class MusicPlayer(QMainWindow):
 
     def onFileTreeDoubleClicked(self, index: QModelIndex):
         file_path = self.fileModel.filePath(index)
-        if os.path.isfile(file_path) and file_path.lower().endswith(('.mp3', '.wav', '.ogg', '.flac')):
+        if os.path.isfile(file_path) and file_path.lower().endswith(('.mp3', '.wav', '.ogg', '.flac', '.m4a')):
             try:
                 idx = self.folderAudioFiles.index(file_path)
             except ValueError:
@@ -643,7 +654,7 @@ class MusicPlayer(QMainWindow):
     def open_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Open Audio File", "",
-            "Audio Files (*.mp3 *.wav *.ogg *.flac)"
+            "Audio Files (*.mp3 *.wav *.ogg *.flac *.m4a)"
         )
         if file_path:
             self.folderAudioFiles = [file_path]
