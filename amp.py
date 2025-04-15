@@ -19,7 +19,6 @@ def setup_vlc_dependencies():
             if all(dll in files for dll in required_files):
                 dll_path = root
                 break
-
     if dll_path:
         os.environ["PATH"] = dll_path + os.pathsep + os.environ.get("PATH", "")
         print("VLC dependencies already present in:", dll_path)
@@ -319,8 +318,8 @@ class MusicPlayer(QMainWindow):
             event.accept()
 
     def get_app_icon(self):
-        base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(__file__)
-        icon_path = os.path.join(base_path, 'ICON.ico')
+        media_path = self.get_media_folder_path()
+        icon_path = os.path.join(media_path, 'amp.png')
         if os.path.exists(icon_path):
             return QIcon(icon_path)
         else:
@@ -446,7 +445,7 @@ class MusicPlayer(QMainWindow):
     def setup_dock(self):
         self.fileDock = QDockWidget("File Explorer", self)
         self.fileDock.setObjectName("FileExplorerDock")
-        self.fileDock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self.fileDock.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
         self.fileModel = QFileSystemModel()
         self.fileModel.setReadOnly(True)
         self.fileTreeView = QTreeView()
@@ -571,11 +570,15 @@ class MusicPlayer(QMainWindow):
         self.fileTreeView.doubleClicked.connect(self.onFileTreeDoubleClicked)
         if self.mediaPlayer:
             self.volumeSlider.valueChanged.connect(self.mediaPlayer.set_volume)
-        self.positionSlider.sliderPressed.connect(lambda: self.allow_position_updates(allow=False))
-        self.positionSlider.sliderReleased.connect(lambda: (self.seek(self.positionSlider.value()), self.allow_position_updates(allow=True)))
+        self.positionSlider.sliderPressed.connect(lambda: self.allow_position_updates(False))
+        self.positionSlider.sliderReleased.connect(self.on_slider_released)
 
     def allow_position_updates(self, allow: bool = True):
         self.update_slider = allow
+
+    def on_slider_released(self):
+        self.seek(self.positionSlider.value())
+        self.allow_position_updates(True)
 
     def open_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Open Folder with Audio Files")
@@ -714,6 +717,7 @@ class MusicPlayer(QMainWindow):
 
     def update_time_labels(self, position, duration):
         def ms_to_minsec(ms):
+            ms = max(ms, 0)
             s = ms // 1000
             m = s // 60
             s = s % 60
@@ -738,6 +742,7 @@ class MusicPlayer(QMainWindow):
         artist = meta.get('artist') or "Unknown Artist"
         album = meta.get('album') or "Unknown Album"
         def ms_to_minsec(ms):
+            ms = max(ms, 0)
             s = ms // 1000
             m = s // 60
             s = s % 60
@@ -760,5 +765,14 @@ class MusicPlayer(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     player = MusicPlayer()
+    if len(sys.argv) > 1:
+        file_arg = sys.argv[1]
+        if os.path.isfile(file_arg) and file_arg.lower().endswith(('.mp3', '.wav', '.ogg', '.flac')):
+            player.folderAudioFiles = [file_arg]
+            player.current_index = 0
+            player.mediaPlayer.set_media(file_arg)
+            player.mediaPlayer.play()
+            player.playButton.setIcon(player.pause_icon)
+            player.updateTrackInfo()
     player.show()
     sys.exit(app.exec_())
