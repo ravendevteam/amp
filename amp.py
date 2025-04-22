@@ -268,6 +268,11 @@ class MusicPlayer(QMainWindow):
         tray_icon_path = os.path.join(media_path, 'tray.png')
         if not os.path.exists(tray_icon_path):
             print(f"Tray icon file not found: {tray_icon_path}")
+        current_file = self.folderAudioFiles[self.current_index]
+        meta = self.extractMetadata(current_file)
+        title = meta.get('title') or os.path.basename(current_file)
+        artist = meta.get('artist') or None
+        album = meta.get('album') or None
         self.trayIcon = QSystemTrayIcon(QIcon(tray_icon_path), self)
         self.trayMenu = QMenu()
         self.trayPlayPauseAction = QAction("Play/Pause", self)
@@ -290,6 +295,8 @@ class MusicPlayer(QMainWindow):
         self.trayExitAction.triggered.connect(self.close)
         self.trayMenu.addAction(self.trayExitAction)
         self.trayIcon.setContextMenu(self.trayMenu)
+        tooltipStr = (f"{artist} - " if artist else "") + title + (f"\nAlbum: {album}" if album else "")
+        self.trayIcon.setToolTip(tooltipStr)
         self.trayIcon.activated.connect(self.on_tray_icon_activated)
         self.trayIcon.show()
 
@@ -452,6 +459,9 @@ class MusicPlayer(QMainWindow):
                 self.artLabel.setText("No Art")
                 self.artLabel.setStyleSheet("border: 1px solid #999; color: gray;")
         self.update_status_bar()
+        if self.trayIcon:
+            tooltipStr = (f"{artist} - " if artist else "") + title + (f"\nAlbum: {album}" if album else "")
+            self.trayIcon.setToolTip(tooltipStr)
 
     def setup_dock(self):
         self.fileDock = QDockWidget("File Explorer", self)
