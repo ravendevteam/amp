@@ -156,6 +156,17 @@ class VLCMediaPlayer(QObject):
 
 
 
+""" Utility function to load icons """
+def load_icon(icon_name):
+    icon_path = os.path.join(os.path.dirname(__file__), icon_name)
+    if getattr(sys, 'frozen', False):
+        icon_path = os.path.join(sys._MEIPASS, icon_name)
+    if os.path.exists(icon_path):
+        return QIcon(icon_path)
+    return None
+
+
+
 """ Utility function to load plugins """
 def load_plugins(app_context):
     user_home = os.path.expanduser("~")
@@ -212,6 +223,7 @@ class MusicPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Amp")
+        self.setWindowIcon(load_icon('amp.png'))
         self.setGeometry(100, 100, 1000, 600)
         self.always_on_top = False
         loadStyle()
@@ -295,7 +307,7 @@ class MusicPlayer(QMainWindow):
         self.trayExitAction.triggered.connect(self.close)
         self.trayMenu.addAction(self.trayExitAction)
         self.trayIcon.setContextMenu(self.trayMenu)
-        tooltipStr = (f"{artist} - " if artist else "") + title + (f"\nAlbum: {album}" if album else "")
+        tooltipStr = (f"{artist} - " if artist else "") + title + (f"\n{album}" if album else "")
         self.trayIcon.setToolTip(tooltipStr)
         self.trayIcon.activated.connect(self.on_tray_icon_activated)
         self.trayIcon.show()
@@ -571,10 +583,10 @@ class MusicPlayer(QMainWindow):
     def setup_actions(self):
         menu_bar = self.menuBar()
         media_menu = menu_bar.addMenu("Media")
-        openFileAction = QAction("Open File", self)
+        openFileAction = QAction("Open File...", self)
         openFileAction.triggered.connect(self.open_file)
         media_menu.addAction(openFileAction)
-        openFolderAction = QAction("Open Folder", self)
+        openFolderAction = QAction("Open Folder...", self)
         openFolderAction.triggered.connect(self.open_folder)
         media_menu.addAction(openFolderAction)
 
